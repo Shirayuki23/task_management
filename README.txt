@@ -31,6 +31,10 @@ DEPLOY KE INFINITYFREE (HOSTING GRATIS PHP+MYSQL)
 
 FITUR
 - Register dan login dengan password_hash/password_verify + CSRF.
+- Lupa password: verifikasi email + tanggal lahir, lalu buat password baru
+  langsung (lupa_password.php). Tanggal lahir wajib diisi saat daftar.
+  (Reset via email tidak bisa dipakai di shared hosting gratis yang
+  memblokir fungsi mail(), makanya pakai verifikasi identitas.)
 - Dashboard dan ringkasan tugas.
 - Tambah, lihat detail, edit, dan hapus tugas.
 - Subtask/checklist per tugas dengan progress bar (tabel sub_tugas,

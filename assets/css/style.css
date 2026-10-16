@@ -600,6 +600,14 @@ textarea::placeholder {
 .auth-footer a {
     font-weight: 700;
 }
+.auth-help {
+    margin: 2px 0 0;
+    text-align: right;
+}
+.auth-help a {
+    font-size: 13px;
+    font-weight: 700;
+}
 .auth-logo img {
     width: 100%;
     height: 100%;

@@ -19,6 +19,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         $nama = trim($_POST['nama'] ?? '');
         $email = trim($_POST['email'] ?? '');
+        $tanggal_lahir = $_POST['tanggal_lahir'] ?? '';
         $password = $_POST['password'] ?? '';
         $konfirmasi = $_POST['konfirmasi'] ?? '';
 
@@ -26,6 +27,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = 'Nama wajib diisi, maksimal 100 karakter.';
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
             $error = 'Format email tidak valid.';
+        } elseif (!tanggal_valid($tanggal_lahir) || $tanggal_lahir > date('Y-m-d')) {
+            $error = 'Tanggal lahir wajib diisi dengan benar (dipakai juga untuk reset password).';
         } elseif (strlen($password) < 6) {
             $error = 'Password minimal 6 karakter.';
         } elseif ($password !== $konfirmasi) {
@@ -44,11 +47,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = 'Email sudah terdaftar.';
                 } else {
                     $hash = password_hash($password, PASSWORD_DEFAULT);
-                    $stmt = mysqli_prepare($conn, 'INSERT INTO users (nama, email, password) VALUES (?, ?, ?)');
+                    $stmt = mysqli_prepare($conn, 'INSERT INTO users (nama, email, password, tanggal_lahir) VALUES (?, ?, ?, ?)');
                     if (!$stmt) {
                         $error = 'Terjadi kesalahan saat menyimpan akun. Coba lagi.';
                     } else {
-                        mysqli_stmt_bind_param($stmt, 'sss', $nama, $email, $hash);
+                        mysqli_stmt_bind_param($stmt, 'ssss', $nama, $email, $hash, $tanggal_lahir);
                         if (mysqli_stmt_execute($stmt)) {
                             $success = 'Registrasi berhasil. Silakan login.';
                             $_POST = [];
@@ -89,6 +92,10 @@ require __DIR__ . '/partials/head.php';
         <label for="reg_email">Email</label>
         <input type="email" id="reg_email" name="email" maxlength="150"
                value="<?= e($_POST['email'] ?? '') ?>" autocomplete="email" required>
+
+        <label for="reg_tgl_lahir">Tanggal Lahir</label>
+        <input type="date" id="reg_tgl_lahir" name="tanggal_lahir" value="<?= e($_POST['tanggal_lahir'] ?? '') ?>"
+               max="<?= date('Y-m-d') ?>" required>
 
         <label for="reg_password">Password</label>
         <input type="password" id="reg_password" name="password" minlength="6"

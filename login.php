@@ -11,6 +11,8 @@ if (!empty($_SESSION['user_id'])) {
 }
 
 $error = '';
+$info = $_SESSION['reset_success'] ?? '';
+unset($_SESSION['reset_success']);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!csrf_valid()) {
@@ -57,6 +59,10 @@ require __DIR__ . '/partials/head.php';
             <div class="alert alert-danger"><?= e($error) ?></div>
         <?php endif; ?>
 
+        <?php if ($info !== ''): ?>
+            <div class="alert alert-success"><?= e($info) ?></div>
+        <?php endif; ?>
+
         <?= csrf_field() ?>
 
         <label for="email">Email</label>
@@ -71,6 +77,8 @@ require __DIR__ . '/partials/head.php';
                 <?= icon('eye') ?>
             </button>
         </div>
+
+        <p class="auth-help"><a href="lupa_password.php">Lupa password?</a></p>
 
         <button class="btn primary full" type="submit">Login</button>
 
