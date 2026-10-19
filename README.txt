@@ -29,6 +29,32 @@ DEPLOY KE INFINITYFREE (HOSTING GRATIS PHP+MYSQL)
 6. Folder lokal XAMPP tetap memakai koneksi localhost; hanya file
    config/koneksi.php yang berbeda antara lokal dan server.
 
+SINKRONISASI GOOGLE CLASSROOM (setup sekali saja)
+1. Buka https://console.cloud.google.com -> buat project baru (bebas nama).
+2. API & Services -> Library -> cari "Google Classroom API" -> Enable.
+3. API & Services -> OAuth consent screen -> External -> isi nama app +
+   email -> sampai selesai (tidak perlu verifikasi domain untuk pemakaian
+   pribadi; akun TESTING tetap dapat dipakai tapi refresh token berlaku
+   7 hari, klik "Hubungkan ulang" tiap minggu).
+4. APIs & Services -> Credentials -> Create Credentials -> OAuth client ID:
+   - Application type: Web application
+   - Authorized JavaScript origins: http://localhost
+     dan https://namakamu.infinityfreeapp.com
+   - Authorized redirect URIs (PERSIS sama, beda huruf/strip dilarang):
+     http://localhost/task_management/classroom_callback.php
+     https://namakamu.infinityfreeapp.com/classroom_callback.php
+5. Salin Client ID dan Client Secret ke config/google.php
+   (GOOGLE_CLIENT_ID dan GOOGLE_CLIENT_SECRET). Upload file yang sama
+   ke server jika sudah live.
+6. Login ke web -> menu Classroom -> Hubungkan Akun Google -> Izinkan.
+   Lalu klik "Sinkronkan Sekarang". Tugas semua kelas aktif masuk
+   otomatis; yang sudah pernah masuk tidak diduplikasi (ext_id).
+Catatan: akun Google sekolah/kampus kadang menolak app yang belum
+diverifikasi ("access blocked"). Solusi: pakai akun Google pribadi
+yang ikut kelas yang sama, atau minta admin mengizinkan.
+Elvira (UNISSULA) belum bisa disinkron otomatis: tidak ada API dan
+halamannya tidak bisa diakses dari server hosting.
+
 FITUR
 - Homepage publik (index.php): penjelasan web + tombol Login/Daftar,
   tidak lagi auto-redirect ke login. Kalau sudah login tombolnya jadi
@@ -47,6 +73,9 @@ FITUR
 - Pencarian judul dan mata pelajaran/kuliah, filter status dan prioritas,
   serta pengurutan (deadline terdekat, prioritas tertinggi, terbaru, A-Z).
 - Hapus massal semua tugas berstatus Selesai (hapus_selesai.php).
+- Sinkronisasi Google Classroom (classroom.php): hubungkan akun Google
+  sekali via OAuth, lalu tarik semua coursework kelas aktif jadi tugas.
+  Dedup otomatis lewat kolom ext_id. Elvira belum (tidak punya API).
 - Notifikasi deadline (H-3 dan terlewat) + badge jumlah belum dibaca di sidebar.
 - Profil pengguna.
 - Setiap tugas terikat ke akun pemiliknya.
@@ -57,6 +86,10 @@ FITUR
 STRUKTUR FILE
 - config/koneksi.php   : koneksi MySQL
 - config/helpers.php   : fungsi e(), CSRF, validasi tugas, badge, sinkron notifikasi
+- config/google.php    : kredensial OAuth Google (isi client ID + secret di sini)
+- config/classroom.php : fungsi tarik coursework dari Classroom API
+- classroom.php        : halaman hubungkan / sinkron / putus akun Google
+- classroom_callback.php : halaman tujuan setelah consent Google (menukar code)
 - partials/icons.php   : fungsi icon() dan logo_svg()
 - partials/head.php    : blok <head> bersama (title lewat $page_title, CSS lewat $css_extra)
 - partials/header.php  : sidebar bersama semua halaman + buka <main>

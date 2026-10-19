@@ -35,6 +35,16 @@ CREATE TABLE IF NOT EXISTS sub_tugas (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 2026-10-19: sinkronisasi Google Classroom
+ALTER TABLE users
+    ADD COLUMN IF NOT EXISTS google_email VARCHAR(150) NULL,
+    ADD COLUMN IF NOT EXISTS google_refresh_token VARCHAR(512) NULL;
+
+ALTER TABLE tugas
+    ADD COLUMN IF NOT EXISTS ext_id VARCHAR(191) NULL;
+
+CREATE INDEX IF NOT EXISTS idx_ext ON tugas (user_id, ext_id);
+
 -- 2026-10-15: samakan nilai ENUM status dengan aplikasi
 UPDATE tugas SET status = 'Belum Dikerjakan' WHERE status = '';
 ALTER TABLE tugas

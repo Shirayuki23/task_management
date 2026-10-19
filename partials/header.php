@@ -21,6 +21,7 @@ $halaman_tugas = ['tugas.php', 'tambah_tugas.php', 'edit_tugas.php', 'detail_tug
                 <?php endif; ?>
             </a>
             <a href="profil.php" class="<?= $page === 'profil.php' ? 'active' : '' ?>"><?= icon('user') ?> Profil</a>
+            <a href="classroom.php" class="<?= $page === 'classroom.php' ? 'active' : '' ?>"><?= icon('layers') ?> Classroom</a>
         </nav>
         <div class="sidebar-bottom">
             <a href="logout.php"><?= icon('logout') ?> Logout</a>
