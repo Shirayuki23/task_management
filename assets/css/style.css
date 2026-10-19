@@ -1063,10 +1063,46 @@ hr {
     .main-header {
         align-items: flex-start;
         flex-wrap: wrap;
+        gap: 14px;
+        padding-top: 52px;
+    }
+    .header-actions {
+        flex-wrap: wrap;
+        gap: 8px;
     }
     .page-header h1,
     .main-header h1 {
         font-size: 22px;
+        overflow-wrap: anywhere;
+    }
+    .table-container table {
+        min-width: 560px;
+    }
+    .task-item,
+    .task-row {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+    .task-actions {
+        width: 100%;
+    }
+    .task-actions .btn {
+        flex: 1;
+    }
+    .subtask-list li {
+        flex-wrap: wrap;
+    }
+    .profile-details dd {
+        overflow-wrap: anywhere;
+    }
+    .filter-bar {
+        align-items: stretch;
+        flex-direction: column;
+    }
+    .filter-bar input,
+    .filter-bar select,
+    .filter-bar .btn {
+        width: 100%;
     }
     .profile-details {
         grid-template-columns: minmax(0, 1fr);
@@ -1111,29 +1147,6 @@ hr {
     }
     .auth-card {
         padding: 23px 18px;
-    }
-    .task-item,
-    .task-row {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-    .task-actions {
-        width: 100%;
-    }
-    .task-actions .btn {
-        flex: 1;
-    }
-    .filter-bar {
-        align-items: stretch;
-        flex-direction: column;
-    }
-    .filter-bar input,
-    .filter-bar select,
-    .filter-bar .btn {
-        width: 100%;
-    }
-    .header-actions {
-        flex-wrap: wrap;
     }
     .form-actions .btn {
         flex: 1 1 auto;

@@ -30,6 +30,9 @@ DEPLOY KE INFINITYFREE (HOSTING GRATIS PHP+MYSQL)
    config/koneksi.php yang berbeda antara lokal dan server.
 
 FITUR
+- Homepage publik (index.php): penjelasan web + tombol Login/Daftar,
+  tidak lagi auto-redirect ke login. Kalau sudah login tombolnya jadi
+  "Buka Dashboard".
 - Register dan login dengan password_hash/password_verify + CSRF.
 - Lupa password: verifikasi email + tanggal lahir, lalu buat password baru
   langsung (lupa_password.php). Tanggal lahir wajib diisi saat daftar.
@@ -59,6 +62,7 @@ STRUKTUR FILE
 - partials/header.php  : sidebar bersama semua halaman + buka <main>
 - partials/footer.php  : tutup layout + muat assets/js/app.js
 - assets/css/style.css : seluruh gaya dasar (tema teal) dan responsif
+- assets/css/landing.css : gaya khusus homepage (index.php)
 - assets/css/icons.css : gaya tambahan untuk logo & ikon (muat setelah style.css)
 - assets/css/notifikasi.css : gaya khusus halaman notifikasi
 - assets/js/app.js     : menu sidebar, toggle password, auto-dismiss alert, anti klik ganda
