@@ -2,6 +2,11 @@
 if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
+// Paksa HTTPS di server (localhost XAMPP tetap lewat HTTP).
+if (empty($_SERVER['HTTPS']) && str_contains($_SERVER['HTTP_HOST'] ?? '', 'infinityfreeapp.com')) {
+    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+    exit;
+}
 require_once __DIR__ . '/../partials/icons.php';
 if (!defined('DAFTAR_PRIORITAS')) {
     define('DAFTAR_PRIORITAS', ['Rendah', 'Sedang', 'Tinggi']);

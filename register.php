@@ -109,6 +109,6 @@ require __DIR__ . '/partials/head.php';
 
         <p class="auth-footer">Sudah punya akun? <a href="login.php">Login</a></p>
     </form>
-    <script src="assets/js/app.js"></script>
+    <script src="assets/js/app.js?v=<?= date('YmdHis', filemtime(__DIR__ . '/assets/js/app.js')) ?>"></script>
 </body>
 </html>
