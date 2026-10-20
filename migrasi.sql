@@ -38,7 +38,8 @@ CREATE TABLE IF NOT EXISTS sub_tugas (
 -- 2026-10-19: sinkronisasi Google Classroom
 ALTER TABLE users
     ADD COLUMN IF NOT EXISTS google_email VARCHAR(150) NULL,
-    ADD COLUMN IF NOT EXISTS google_refresh_token VARCHAR(512) NULL;
+    ADD COLUMN IF NOT EXISTS google_refresh_token VARCHAR(512) NULL,
+    ADD COLUMN IF NOT EXISTS google_last_sync DATETIME NULL;
 
 ALTER TABLE tugas
     ADD COLUMN IF NOT EXISTS ext_id VARCHAR(191) NULL;

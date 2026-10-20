@@ -74,8 +74,10 @@ FITUR
   serta pengurutan (deadline terdekat, prioritas tertinggi, terbaru, A-Z).
 - Hapus massal semua tugas berstatus Selesai (hapus_selesai.php).
 - Sinkronisasi Google Classroom (classroom.php): hubungkan akun Google
-  sekali via OAuth, lalu tarik semua coursework kelas aktif jadi tugas.
-  Dedup otomatis lewat kolom ext_id. Elvira belum (tidak punya API).
+  sekali via OAuth, lalu tarik coursework kelas aktif jadi tugas.
+  Sinkron ulang ikut memperbarui judul/deadline yang diubah guru (status
+  & prioritas lokal tidak ditimpa), dan dashboard auto-sync maks 1x/6 jam
+  (pengganti cron). Dedup lewat ext_id. Elvira belum (tidak ada API).
 - Notifikasi deadline (H-3 dan terlewat) + badge jumlah belum dibaca di sidebar.
 - Profil pengguna.
 - Setiap tugas terikat ke akun pemiliknya.

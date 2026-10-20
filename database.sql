@@ -14,7 +14,8 @@ CREATE TABLE IF NOT EXISTS users (
     tempat_tinggal VARCHAR(150) NULL,
     no_telepon VARCHAR(20) NULL,
     google_email VARCHAR(150) NULL,
-    google_refresh_token VARCHAR(512) NULL
+    google_refresh_token VARCHAR(512) NULL,
+    google_last_sync DATETIME NULL
 );
 
 CREATE TABLE IF NOT EXISTS tugas (

@@ -17,7 +17,7 @@ if ($galat !== '') {
     $error = $galat;
 }
 
-$stmt = mysqli_prepare($conn, 'SELECT google_email, google_refresh_token FROM users WHERE id = ? LIMIT 1');
+$stmt = mysqli_prepare($conn, 'SELECT google_email, google_refresh_token, google_last_sync FROM users WHERE id = ? LIMIT 1');
 mysqli_stmt_bind_param($stmt, 'i', $user_id);
 mysqli_stmt_execute($stmt);
 $akun_google = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
@@ -33,52 +33,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && $siap) {
         $aksi = $_POST['aksi'] ?? '';
 
         if ($aksi === 'putuskan') {
-            $stmt = mysqli_prepare($conn, 'UPDATE users SET google_email = NULL, google_refresh_token = NULL WHERE id = ?');
+            $stmt = mysqli_prepare($conn, 'UPDATE users SET google_email = NULL, google_refresh_token = NULL, google_last_sync = NULL WHERE id = ?');
             mysqli_stmt_bind_param($stmt, 'i', $user_id);
             mysqli_stmt_execute($stmt);
             mysqli_stmt_close($stmt);
             $terhubung = false;
-            $akun_google = ['google_email' => '', 'google_refresh_token' => ''];
+            $akun_google = ['google_email' => '', 'google_refresh_token' => '', 'google_last_sync' => ''];
             $success = 'Akun Google diputus. Tugas yang sudah masuk tetap tersimpan.';
         }
 
         if ($aksi === 'sinkron' && $terhubung) {
-            [$daftar, $err] = classroom_ambil_tugas($akun_google['google_refresh_token']);
+            [$ringkas, $err] = classroom_sinkron($conn, $user_id, $akun_google['google_refresh_token']);
             if ($err !== '') {
                 $error = $err;
                 if (str_contains($error, 'invalid_grant')) {
                     $error .= ' — koneksi Google kedaluwarsa, klik "Hubungkan ulang" di bawah.';
                 }
             } else {
-                $sudah = [];
-                $stmt = mysqli_prepare($conn, 'SELECT ext_id FROM tugas WHERE user_id = ? AND ext_id IS NOT NULL');
-                mysqli_stmt_bind_param($stmt, 'i', $user_id);
-                mysqli_stmt_execute($stmt);
-                $res = mysqli_stmt_get_result($stmt);
-                while ($baris = mysqli_fetch_assoc($res)) {
-                    $sudah[$baris['ext_id']] = true;
-                }
-                mysqli_stmt_close($stmt);
-
-                $baru = 0;
-                $prioritas = 'Sedang';
-                $stmt = mysqli_prepare($conn, 'INSERT INTO tugas (user_id, judul, mata_kuliah, deskripsi, deadline, prioritas, status, ext_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
-                if ($stmt) {
-                    foreach ($daftar as $t) {
-                        if (isset($sudah[$t['ext_id']])) {
-                            continue;
-                        }
-                        $status = 'Belum Dikerjakan';
-                        mysqli_stmt_bind_param($stmt, 'isssssss', $user_id, $t['judul'], $t['mata_kuliah'], $t['deskripsi'], $t['deadline'], $prioritas, $status, $t['ext_id']);
-                        if (mysqli_stmt_execute($stmt)) {
-                            $baru++;
-                        }
-                    }
-                    mysqli_stmt_close($stmt);
-                }
-                $lewat = count($daftar) - $baru;
-                $success = 'Sinkron selesai. ' . $baru . ' tugas baru diimpor'
-                    . ($lewat > 0 ? ' (' . $lewat . ' sudah pernah masuk, dilewati).' : '.');
+                $akun_google['google_last_sync'] = date('Y-m-d H:i:s');
+                $success = 'Sinkron selesai: ' . $ringkas['total'] . ' tugas di Classroom, '
+                    . $ringkas['baru'] . ' baru diimpor'
+                    . ($ringkas['ubah'] > 0 ? ', ' . $ringkas['ubah'] . ' diperbarui dari perubahan guru.' : '.');
             }
         }
     }
@@ -119,7 +94,11 @@ require __DIR__ . '/partials/head.php';
             <?php if ($terhubung): ?>
                 <h2>Terhubung sebagai <?= e($akun_google['google_email'] ?: 'akun Google') ?></h2>
                 <p class="muted">Tugas (coursework) dari semua kelas aktif akan ditarik.
-                    Tugas yang sudah pernah diimpor tidak diduplikasi.</p>
+                    Tugas yang sudah pernah diimpor tidak diduplikasi; kalau guru mengubah
+                    judul/deadline, salinan di sini ikut diperbarui.</p>
+                <p class="muted">Sinkron terakhir:
+                    <b><?= $akun_google['google_last_sync'] ? e(date('d/m/Y H:i', strtotime($akun_google['google_last_sync']))) : 'belum pernah' ?></b>
+                    — dashboard juga sinkron otomatis maksimal 1x per 6 jam.</p>
                 <div class="form-actions">
                     <form method="post" class="inline-form">
                         <?= csrf_field() ?>

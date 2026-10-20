@@ -160,3 +160,91 @@ function classroom_ambil_tugas($refresh_token) {
     }
     return [$hasil, ''];
 }
+
+// Simpan/ubah hasil Classroom ke database. Status & prioritas milik user
+// tidak pernah ditimpa; hanya konten dari Classroom yang diperbarui.
+function classroom_simpan_db($conn, $user_id, $daftar) {
+    $lama = [];
+    $stmt = mysqli_prepare($conn, 'SELECT id, ext_id, judul, mata_kuliah, deadline FROM tugas WHERE user_id = ? AND ext_id IS NOT NULL');
+    mysqli_stmt_bind_param($stmt, 'i', $user_id);
+    mysqli_stmt_execute($stmt);
+    $res = mysqli_stmt_get_result($stmt);
+    while ($baris = mysqli_fetch_assoc($res)) {
+        $lama[$baris['ext_id']] = $baris;
+    }
+    mysqli_stmt_close($stmt);
+
+    $baru = 0;
+    $ubah = 0;
+    $prioritas = 'Sedang';
+    $status = 'Belum Dikerjakan';
+
+    $ins = mysqli_prepare($conn, 'INSERT INTO tugas (user_id, judul, mata_kuliah, deskripsi, deadline, prioritas, status, ext_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    $upd = mysqli_prepare($conn, 'UPDATE tugas SET judul = ?, mata_kuliah = ?, deskripsi = ?, deadline = ? WHERE id = ? AND user_id = ?');
+    if (!$ins || !$upd) {
+        return [0, 0, 'Query sinkronisasi gagal disiapkan.'];
+    }
+
+    foreach ($daftar as $t) {
+        $milik = $lama[$t['ext_id']] ?? null;
+        if ($milik === null) {
+            mysqli_stmt_bind_param($ins, 'isssssss', $user_id, $t['judul'], $t['mata_kuliah'], $t['deskripsi'], $t['deadline'], $prioritas, $status, $t['ext_id']);
+            if (mysqli_stmt_execute($ins)) {
+                $baru++;
+            }
+        } elseif ($milik['judul'] !== $t['judul'] || $milik['mata_kuliah'] !== $t['mata_kuliah'] || $milik['deadline'] !== $t['deadline']) {
+            $id = (int) $milik['id'];
+            mysqli_stmt_bind_param($upd, 'ssssii', $t['judul'], $t['mata_kuliah'], $t['deskripsi'], $t['deadline'], $id, $user_id);
+            if (mysqli_stmt_execute($upd)) {
+                $ubah++;
+            }
+        }
+    }
+    mysqli_stmt_close($ins);
+    mysqli_stmt_close($upd);
+
+    $st = mysqli_prepare($conn, 'UPDATE users SET google_last_sync = NOW() WHERE id = ?');
+    mysqli_stmt_bind_param($st, 'i', $user_id);
+    mysqli_stmt_execute($st);
+    mysqli_stmt_close($st);
+
+    return [$baru, $ubah, ''];
+}
+
+// Tarik dari Google lalu simpan. Menghasilkan [ringkasan, error].
+function classroom_sinkron($conn, $user_id, $refresh_token) {
+    [$daftar, $err] = classroom_ambil_tugas($refresh_token);
+    if ($err !== '') {
+        return [null, $err];
+    }
+    [$baru, $ubah, $err] = classroom_simpan_db($conn, $user_id, $daftar);
+    if ($err !== '') {
+        return [null, $err];
+    }
+    return [['total' => count($daftar), 'baru' => $baru, 'ubah' => $ubah], ''];
+}
+
+// Sinkron senyap saat dashboard dibuka, maksimal 1x per 6 jam.
+// Dipakai karena shared hosting gratis tidak menyediakan cron.
+function classroom_auto_sinkron($conn, $user_id) {
+    if (!google_kredensial_siap()) {
+        return;
+    }
+    $stmt = mysqli_prepare($conn, 'SELECT google_refresh_token, google_last_sync FROM users WHERE id = ? LIMIT 1');
+    if (!$stmt) {
+        return;
+    }
+    mysqli_stmt_bind_param($stmt, 'i', $user_id);
+    mysqli_stmt_execute($stmt);
+    $baris = mysqli_fetch_assoc(mysqli_stmt_get_result($stmt));
+    mysqli_stmt_close($stmt);
+
+    if (empty($baris['google_refresh_token'])) {
+        return;
+    }
+    $terakhir = $baris['google_last_sync'] ?? '';
+    if ($terakhir !== '' && strtotime($terakhir) > time() - 6 * 3600) {
+        return;
+    }
+    classroom_sinkron($conn, $user_id, $baris['google_refresh_token']);
+}
