@@ -1,8 +1,5 @@
 <?php
 require_once 'auth.php';
-require_once __DIR__ . '/config/classroom.php';
-
-classroom_auto_sinkron($conn, $user_id);
 
 $stmt = mysqli_prepare($conn, "SELECT COUNT(*) AS total, SUM(status = 'Belum Dikerjakan') AS belum, SUM(status = 'Sedang Dikerjakan') AS proses, SUM(status = 'Selesai') AS selesai FROM tugas WHERE user_id = ?");
 if (!$stmt) {

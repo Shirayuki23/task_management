@@ -12,10 +12,7 @@ CREATE TABLE IF NOT EXISTS users (
     tanggal_lahir DATE NULL,
     jenis_kelamin VARCHAR(20) NULL,
     tempat_tinggal VARCHAR(150) NULL,
-    no_telepon VARCHAR(20) NULL,
-    google_email VARCHAR(150) NULL,
-    google_refresh_token VARCHAR(512) NULL,
-    google_last_sync DATETIME NULL
+    no_telepon VARCHAR(20) NULL
 );
 
 CREATE TABLE IF NOT EXISTS tugas (
@@ -27,9 +24,7 @@ CREATE TABLE IF NOT EXISTS tugas (
     deadline DATE NOT NULL,
     prioritas ENUM('Rendah', 'Sedang', 'Tinggi') NOT NULL DEFAULT 'Sedang',
     status ENUM('Belum Dikerjakan', 'Sedang Dikerjakan', 'Selesai') NOT NULL DEFAULT 'Belum Dikerjakan',
-    ext_id VARCHAR(191) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    INDEX idx_ext (user_id, ext_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 

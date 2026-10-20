@@ -488,9 +488,6 @@ textarea::placeholder {
     gap: 10px;
     margin-top: 22px;
 }
-.form-actions .inline-form {
-    display: contents;
-}
 .alert {
     margin-bottom: 18px;
     padding: 13px 15px;
